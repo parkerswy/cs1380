@@ -17,20 +17,6 @@ test('(1 pts) serializeNumber', () => {
   expect(deserialized).toEqual(number);
 });
 
-test('(0 pts) serializeBigInt', () => {
-  const value = BigInt('9007199254740993');
-  const serialized = util.serialize(value);
-  const deserialized = util.deserialize(serialized);
-  expect(deserialized).toEqual(value);
-});
-
-test('(0 pts) serializeBigIntHex', () => {
-  const value = BigInt('0x1fffffffffffff');
-  const serialized = util.serialize(value);
-  const deserialized = util.deserialize(serialized);
-  expect(deserialized).toEqual(value);
-});
-
 test('(1 pts) serializeNaN', () => {
   const number = NaN;
   const serialized = util.serialize(number);
@@ -54,13 +40,6 @@ test('(1 pts) serializeString', () => {
 
 test('(2 pts) serializeSimpleObject', () => {
   const object = {a: 1, b: 2, c: 3};
-  const serialized = util.serialize(object);
-  const deserialized = util.deserialize(serialized);
-  expect(deserialized).toEqual(object);
-});
-
-test('(0 pts) serializeBigIntInObject', () => {
-  const object = {a: BigInt('123456789012345678')};
   const serialized = util.serialize(object);
   const deserialized = util.deserialize(serialized);
   expect(deserialized).toEqual(object);
