@@ -1,0 +1,3 @@
+ancient | 100 | https://slay.com/resources
+jersey | 1 | https://slay.com/resources
+ancient jersey | 1 | https://slay.com/resources

@@ -1,0 +1,7 @@
+<!doctype html>
+<html>
+  <body>
+    <a href="FAQ">FAQ</a>
+    <a href="resources">Resources</a>
+  </body>
+</html>
