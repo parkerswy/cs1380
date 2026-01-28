@@ -16,4 +16,8 @@ const rl = readline.createInterface({
 
 rl.on('line', function(line) {
   // Print the Porter stem from `natural` for each element of the stream.
+  const newLine = line.trim().split(/\s+/);
+  for (const word of newLine) {
+    console.log(natural.PorterStemmer.stem(word.toLowerCase()));
+  }
 });
