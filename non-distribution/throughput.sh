@@ -84,7 +84,7 @@ query_succeeded=0
 query_start_ns="$(now_ns)"
 
 for q in "${ts[@]}"; do
-  if ./query.js $q >/dev/null; then
+  if ./query.js "$q" >/dev/null; then
     query_succeeded=$((query_succeeded + 1))
   fi
 done
