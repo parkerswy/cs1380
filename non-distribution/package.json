@@ -41,7 +41,9 @@
         "aws": { "crawler": 0.916, "indexer": 1.226, "query": 1.845 },
         "gs": [0.0675]
       },
-      "dloc": 5000
+      "dloc": 5000,
+      "jsloc": 80,
+      "sloc": 271
     }
   ]
 }

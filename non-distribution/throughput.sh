@@ -9,14 +9,6 @@ ts=(
   "zone"
 )
 
-us=(
-  "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1c/fact_6/index.html"
-  "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1b/fact_3/index.html"
-  "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1b/fact_4/index.html"
-  "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/level_2b/index.html"
-  "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/level_2a/index.html"
-)
-
 vs=(
   "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/index.html"
   "https://cs.brown.edu/courses/csci1380/sandbox/1/level_1a/level_2b/index.html"

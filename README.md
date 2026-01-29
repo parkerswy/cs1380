@@ -124,5 +124,27 @@ distribution.node.start(() => {
 ```
 
 # Results and Reflections
+name: Wan Yi Sze 
+email: wan_yi_sze@brown.edu
+cslogin: wsze3
 
-> ...
+## Summary
+My implementation consists of 8 components addressing T1--8. The most challenging aspect was learning shell commands because I rarely use them and am not very familiar with it.
+
+## Correctness & Performance Characterization
+To characterize correctness, we developed 8 that test the following cases: 
+- generates correct 1/2/3-grams from a token stream
+- extracts the expected plain text from HTML input
+- extracts the correct set of URLs from an HTML page resolving against a given base URL
+- turns processed terms into local index
+- incrementally merges multiple local index files into one global index and matches the expected merged result
+- normalizes input text into the canonical token stream used downstream
+- searches a global index and returns the matching lines for a term
+- stems tokens correctly 
+
+I characterized performance using throughput metrics for each stage of the pipeline. For the crawler, I measured pages downloaded per second by timing how long it took to run crawl.sh over a fixed set of URLs and dividing the number of successful crawls by the elapsed time. For the indexer, I measured pages indexed per second by timing only the index.sh step (excluding crawling), summing indexing time across pages, and dividing the number of successful index operations by that total indexing time. For querying, I measured queries per second by timing a batch of representative queries against a d/global-index.txt, and dividing the number of successful query runs by the total query time.
+
+The throughput of various subsystems is described in the `"throughput"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
+
+## Wild Guess
+5000 lines of code because it would probably take a lot more code to ensure fault tolerance and low latency etc. 
