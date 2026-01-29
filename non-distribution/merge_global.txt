@@ -1,5 +1,0 @@
-jersey | https://slay.com/resources 1
-new | https://slay.com/resources 100 https://slay.com/FAQ 10
-new jersey | https://slay.com/resources 1
-new york | https://slay.com/FAQ 1
-york | https://slay.com/FAQ 1
