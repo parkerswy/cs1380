@@ -2,9 +2,9 @@
   "name": "cs1380:m0",
   "version": "1.0.0",
   "author": {
-    "name": "<first last?>",
-    "email": "<email@brown.edu?>",
-    "cslogin": "<cslogin?>"
+    "name": "Wan Yi Sze",
+    "email": "wan_yi_sze@brown.edu",
+    "cslogin": "wsze3"
   },
   "description": "A set of components for cs1380's search engine.",
   "dependencies": {
@@ -29,7 +29,7 @@
   "report": [
     {
       "milestone": "M0",
-      "hours": 999,
+      "hours": 20,
       "loc": 999,
       "dev": {
         "cpu-no": 999,
@@ -41,7 +41,7 @@
         "aws": [],
         "gs": []
       },
-      "dloc": -99
+      "dloc": 5000
     }
   ]
 }
