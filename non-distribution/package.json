@@ -30,15 +30,15 @@
     {
       "milestone": "M0",
       "hours": 15,
-      "loc": 999,
+      "loc": 5,
       "dev": {
-        "cpu-no": 999,
-        "mem-gb": 999,
-        "ssd-gb": 999
+        "cpu-no": 8,
+        "mem-gb": 4,
+        "ssd-gb": 229
       },
       "throughput": {
-        "dev": [],
-        "aws": [],
+        "dev": [(crawler, 0.494), (indexer, 1.696), (query, 4.354)],
+        "aws": [(crawler, 0.916), (indexer, 1.226), (query, 1.845)],
         "gs": []
       },
       "dloc": 5000
