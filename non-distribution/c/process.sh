@@ -11,4 +11,4 @@
 # Tip: Make sure your program doesn't emit a non-zero exit code if there are no words left after removing stopwords.
 # You can combine the grep invocation with `|| true` to achieve this. Be careful though, as this will also hide other errors!
 
-iconv -f UTF-8 -t US-ASCII//TRANSLIT | LC_ALL=C tr 'A-Z' 'a-z' | LC_ALL=C tr -c '[:alpha:]' '\n' | (grep -v -x -F -f d/stopwords.txt || true)
+iconv -f UTF-8 -t US-ASCII//TRANSLIT | LC_ALL=C tr '[:upper:]' '[:lower:]' | LC_ALL=C tr -c '[:alpha:]' '\n' | (grep -v -x -F -f d/stopwords.txt || true)
