@@ -238,3 +238,48 @@ test('(0 pts) deserialize rejects unknown serialized types', () => {
   const bad = JSON.stringify({type: 'not-a-real-type', value: 'x'});
   expect(() => util.deserialize(bad)).toThrow();
 });
+
+test('(0 pts) serialize config object', () => {
+  const config = {ip: '127.0.0.1', port: 8001,
+    onStart: function(e) {
+      const onStart = function() {};
+
+      const aCallback = function(...args) {
+        const callback = args.pop();
+
+        const remote = {
+          node: {ip: '127.0.0.1', port: 1234},
+          service: '894caa71b143e1cb48d5ad95fe68c91d3dfa88c94eeecbac44fddb9d87b982a6',
+          method: 'call',
+        };
+
+        const message = args;
+
+        distribution.local.comm.send(message, remote, (error, response) => {
+          if (error) {
+            return callback(error);
+          } else {
+            return callback(null, response);
+          }
+        });
+      };
+
+      if (e) {
+        aCallback(e, null, () => {});
+        return;
+      }
+
+      try {
+        onStart();
+        aCallback(null, global.distribution.node.config, () => {});
+      } catch (e) {
+        aCallback(e, null, () => {});
+      }
+    },
+  };
+  const serialized = util.serialize(config);
+  const deserialized = util.deserialize(serialized);
+  expect(deserialized.ip).toEqual(config.ip);
+  expect(deserialized.port).toEqual(config.port);
+  expect(typeof deserialized.onStart).toEqual('function');
+});
