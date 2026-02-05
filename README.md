@@ -128,10 +128,11 @@ name: Wan Yi Sze
 email: wan_yi_sze@brown.edu
 cslogin: wsze3
 
-## Summary
+## M0
+### Summary
 My implementation consists of 8 components addressing T1--8. The most challenging aspect was learning shell commands because I rarely use them and am not very familiar with it.
 
-## Correctness & Performance Characterization
+### Correctness & Performance Characterization
 To characterize correctness, we developed 8 that test the following cases: 
 - generates correct 1/2/3-grams from a token stream
 - extracts the expected plain text from HTML input
@@ -146,5 +147,18 @@ I characterized performance using throughput metrics for each stage of the pipel
 
 The throughput of various subsystems is described in the `"throughput"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
 
-## Wild Guess
+### Wild Guess
 5000 lines of code because it would probably take a lot more code to ensure fault tolerance and low latency etc. 
+
+## M1
+### Summary
+I had 2 recursive functions for serializing and deserializing, namely encode and decode. Encode converts values into tagged objects, with the "type" field indicating its type and the value field storing the data. Decode reverses this process and reconstructs the original values.
+
+My implementation comprises 4 software components, totaling 213 lines of code. Key challenges included debugging the recursive implementation for serialization and deserialization. I addressed it by using the JS debugger to see where it went wrong.
+
+### Correctness & Performance Characterization
+
+*Correctness*: I wrote 5 tests; these tests take 2.28s to execute locally. This includes nested objects and arrays with mixed types, special JavaScript values like null, undefined, NaN, Infinity, booleans, numbers, strings, correct Date round-tripping, function serialization and deserialization via behavioral checks, error construction and message preservation, and object aliasing.
+
+*Performance*: The latency of various subsystems is described in the `"latency"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
+
