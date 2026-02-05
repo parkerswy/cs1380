@@ -44,6 +44,7 @@ test('latency characterization (3 workloads)', () => {
     // Average latency (seconds per operation)
     const avgSerSeconds = serSeconds / N;
     const avgDesSeconds = deserSeconds / N;
+    const pairLatency = totalSeconds / N;
 
     // Throughput (operations per second)
     const serThroughput = N / serSeconds;
