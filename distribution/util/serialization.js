@@ -1,5 +1,7 @@
 // @ts-check
 
+console.log("SERIALIZATION LOADED FROM:", __filename);
+
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
