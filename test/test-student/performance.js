@@ -61,10 +61,11 @@ test('latency characterization (3 workloads)', () => {
       // average latency 
       avgSerializeSeconds: avgSerSeconds,
       avgDeserializeSeconds: avgDesSeconds,
+      pairLatency: totalSeconds,
       // throughput
       serializeOpsPerSecond: serThroughput,
       deserializeOpsPerSecond: desThroughput,
-      serializeDeserializePairsPerSecond: pairThroughput,
+      pairThroughput: pairThroughput,
     });
   }
   console.log('M1 latency & throughput (seconds-based) results:', JSON.stringify(results, null, 2));
