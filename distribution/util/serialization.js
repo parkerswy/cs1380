@@ -1,7 +1,5 @@
 // @ts-check
 
-console.log("SERIALIZATION LOADED FROM:", __filename);
-
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -69,7 +67,7 @@ function resolveNativeFunctionRef(ref) {
 }
 
 /**
- * @param {any} value
+ * @param {any} object
  * @param {WeakMap<object, number>} seen
  * @param {{v:number}} nextId
  * @returns {any}

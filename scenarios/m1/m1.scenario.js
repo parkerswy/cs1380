@@ -17,7 +17,7 @@ test('(3 pts) (scenario) expected object', () => {
   /* Prepare an object so it results in an expected serialized string. */
   let object = null;
 
-  let serializedObject = '{"type":"null","value":null}'; /* Add here the expected serialized string by using util.serialize */
+  let serializedObject = JSON.stringify({"type":"null","value":null}); /* Add here the expected serialized string by using util.serialize */
   expect(util.serialize(object)).toEqual(serializedObject);
 });
 
