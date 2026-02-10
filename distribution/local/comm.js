@@ -5,6 +5,7 @@
  */
 
 const http = require('node:http');
+const distribution = globalThis.distribution;
 
 /**
  * @typedef {Object} Target
@@ -21,7 +22,19 @@ const http = require('node:http');
  * @returns {void}
  */
 function send(message, remote, callback) {
-  return callback(new Error('comm.send not implemented'));
+  distribution.local.routes.get(remote.service, (error, service) => {
+    if (error) {
+      const err = error instanceof Error ? error : new Error(JSON.stringify(error));
+      callback(err, undefined);
+    }
+    else {
+      const fn = service?.[remote.method]
+      if (!fn) {
+        callback(new Error("undefined method"), undefined);
+      }
+      fn(...message, (err, val) => callback(err, val))
+    }
+  })
 }
 
 module.exports = {send};
