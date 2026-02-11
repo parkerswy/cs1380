@@ -22,14 +22,10 @@ function get(configuration, callback) {
   if (!service) {
     return callback(new Error('routes.get: invalid configuration'), undefined);
   }
-  switch (service) {
-    case "status":
-    case "comms":
-    case "route":
-      return callback(null, distribution.local[configuration]);
-    default:
-      return callback(new Error('routes.get: invalid service'), undefined);
+  if (!Object.prototype.hasOwnProperty.call(distribution.local, service)) {
+    return callback(new Error('routes.get: invalid service'), undefined);
   }
+  return callback(null, distribution.local[service]);
 }
 
 /**
@@ -40,6 +36,9 @@ function get(configuration, callback) {
  */
 function put(service, configuration, callback) {
   if (typeof callback !== "function") return;
+  if (typeof configuration !== "string" || !configuration) {
+    return callback(new Error("routes.put: invalid configuration"), undefined);
+  }
   if (!service || typeof service !== "object") {
     return callback(new Error("routes.put: invalid service"), undefined);
   }

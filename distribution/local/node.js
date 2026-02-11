@@ -85,16 +85,17 @@ function start(callback) {
     distribution.node.counts += 1;
     /* Your server will be listening for PUT requests. */
     if (req.method !== "PUT") {
-      res.statusCode = 405;
-      res.end("request not allowed. only PUT requests will be entertained.");
-      return
+      const body = distribution.util.serialize(new Error("request not supported"));
+      res.writeHead(405, { "Content-Type": "application/json" });
+      res.end(body);
+      return;
     }
 
     /*
       The path of the http request will determine the service to be used.
       The url will have the form: http://node_ip:node_port/service/method
     */
-    const u = new URL(req.url, `https://${distribution.node.config.ip}:${distribution.node.config.port}`)
+    const u = new URL(req.url, `http://${distribution.node.config.ip}:${distribution.node.config.port}`)
     const pathname = u.pathname
     const parts = pathname.split('/').filter(Boolean); 
     const gid = parts[0];
@@ -126,18 +127,17 @@ function start(callback) {
       const raw = Buffer.concat(body).toString("utf8");
         let payload;
         try {
-          payload = raw.length ? distribution.util.deserialize(raw) : null;
+          payload = raw.length ? distribution.util.deserialize(raw) : [];
         } catch (e) {
-          res.statusCode = 400;
-          res.setHeader("Content-Type", "application/json; charset=utf-8");
-          res.end("Invalid JSON");
+          res.writeHead(400, { "Content-Type": "application/json" });
+          let body = distribution.util.serialize([new Error("Invalid payload"), null]);
+          res.end(body);
           return;
         }
 
       if (!service || !method) {
-        res.statusCode = 400;
-        res.setHeader("Content-Type", "text/plain; charset=utf-8");
-        res.end("Bad request: expected /<gid>/<service>/<method>");
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(distribution.util.serialize([new Error("Bad request"), null]));
         return;
       }
       /*
@@ -150,28 +150,29 @@ function start(callback) {
       distribution.local.routes.get(service, (error, sv) => {
         if (error || !sv) {
           res.statusCode = 404;
-          res.setHeader("Content-Type", "text/plain; charset=utf-8");
-          res.end("Invalid service");
-          return
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([new Error("invalid service"), null]));
+          return;
         }
         const fn = sv?.[method];
         if (!fn) {
           res.statusCode = 404;
-          res.setHeader("Content-Type", "text/plain; charset=utf-8");
-          res.end("Invalid method");
-          return
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([new Error("invalid service"), null]));
+          return;
         }
         fn(...payload, (err, val) => {
           if (err) {
             res.statusCode = 500;
-            res.setHeader("Content-Type", "text/plain; charset=utf-8");
-            res.end(String(err?.message ?? err));
+            res.setHeader("Content-Type", "application/json");
+            let body = distribution.util.serialize([err, null]);
+            res.end(body);
             return
           }
 
           res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json; charset=utf-8");
-          res.end(distribution.util.serialize(val));
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([null, val]));
           return
         })
       })
