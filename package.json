@@ -47,12 +47,12 @@
     },
     {
       "milestone": "M2",
-      "hours": 999,
-      "loc": 999,
+      "hours": 10,
+      "loc": 274,
       "dev": {
-        "cpu-no": 999,
-        "mem-gb": 999,
-        "ssd-gb": 999
+        "cpu-no": 8,
+        "mem-gb": 8,
+        "ssd-gb": 245
       },
       "throughput": {
         "dev": [9020.41],
