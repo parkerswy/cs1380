@@ -163,7 +163,7 @@ My implementation comprises 4 software components, totaling 213 lines of code. K
 
 ## M2
 ### Summary
-My implementation comprises 4 software components, totaling 274 lines of code. Key challenges included 
+My implementation supports RPC end-to-end, wiring routing, communication, and service invocation into a consistent request and response flow. It comprises 4 software components, totaling 274 lines of code. Key challenges included understanding the role of each component and how they interact. Overcame it by patiently reading the code and drawing a diagram.
 
 ### Correctness & Performance Characterization
 *Correctness*: I wrote 5 tests; these tests take 0.654 s to execute.

@@ -48,7 +48,7 @@
     {
       "milestone": "M2",
       "hours": 10,
-      "loc": 274,
+      "loc": 679,
       "dev": {
         "cpu-no": 8,
         "mem-gb": 8,
