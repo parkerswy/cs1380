@@ -52,7 +52,7 @@ async function characterize(label, callFn) {
   console.log(`${label} latency: ${lat.latency_s.toFixed(8)} s`);
 }
 
-describe('T6 throughput/latency', () => {
+describe('throughput/latency', () => {
   jest.setTimeout(60_000);
 
   test('comm', async () => {
@@ -72,19 +72,4 @@ describe('T6 throughput/latency', () => {
 
     await characterize('comm', callComm);
   });
-
-  /*
-  test('rpc', async () => {
-    const callRPC = () =>
-      new Promise((resolve, reject) => {
-        distribution.local.rpc.send(
-          [2],
-          { node: { ip: '127.0.0.1', port: 9009 }, service: 'addOneService', method: 'addOne' },
-          (e, v) => (e ? reject(e) : resolve(v))
-        );
-      });
-
-    await characterize('rpc', callRPC);
-  });
-  */
 });
