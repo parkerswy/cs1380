@@ -6,8 +6,8 @@
 const http = require('node:http');
 const url = require('node:url');
 const log = require('../util/log.js');
-
 const yargs = require('yargs/yargs');
+const distribution = globalThis.distribution
 
 /**
  * @returns {Node}
@@ -80,19 +80,36 @@ function setNodeConfig() {
  * @returns {void}
  */
 function start(callback) {
+  const existing = globalThis.distribution?.node?.server;
+  if (existing && existing.listening) {
+    callback(null);
+    return;
+  }
+  if (existing && !existing.listening) {
+    try { existing.close(); } catch {}
+  }
+
+  distribution.node.counts ??= 0;
   const server = http.createServer((req, res) => {
+    distribution.node.counts += 1;
     /* Your server will be listening for PUT requests. */
-
-    // Write some code...
-
+    if (req.method !== "PUT") {
+      const body = distribution.util.serialize(new Error("request not supported"));
+      res.writeHead(405, { "Content-Type": "application/json" });
+      res.end(body);
+      return;
+    }
 
     /*
       The path of the http request will determine the service to be used.
       The url will have the form: http://node_ip:node_port/service/method
     */
-
-    // Write some code...
-
+    const u = new URL(req.url, `http://${distribution.node.config.ip}:${distribution.node.config.port}`)
+    const pathname = u.pathname
+    const parts = pathname.split('/').filter(Boolean); 
+    const gid = parts[0];
+    const service = parts[1];
+    const method = parts[2];
 
     /*
       A common pattern in handling HTTP requests in Node.js is to have a
@@ -108,16 +125,30 @@ function start(callback) {
       Our nodes expect data in JSON format.
     */
 
-    // Write some code...
-
     /** @type {any[]} */
     const body = [];
 
     req.on('data', (chunk) => {
+      body.push(chunk)
     });
 
     req.on('end', () => {
+      const raw = Buffer.concat(body).toString("utf8");
+        let payload;
+        try {
+          payload = raw.length ? distribution.util.deserialize(raw) : [];
+        } catch (e) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          let body = distribution.util.serialize([new Error("Invalid payload"), null]);
+          res.end(body);
+          return;
+        }
 
+      if (!service || !method) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(distribution.util.serialize([new Error("Bad request"), null]));
+        return;
+      }
       /*
         Here, you can handle the service requests.
         Use the local routes service to get the service you need to call.
@@ -125,7 +156,35 @@ function start(callback) {
         Then, you need to serialize the result and send it back to the caller.
       */
 
-      // Write some code...
+      distribution.local.routes.get(service, (error, sv) => {
+        if (error || !sv) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([new Error("invalid service"), null]));
+          return;
+        }
+        const fn = sv?.[method];
+        if (!fn) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([new Error("invalid service"), null]));
+          return;
+        }
+        fn(...payload, (err, val) => {
+          if (err) {
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "application/json");
+            let body = distribution.util.serialize([err, null]);
+            res.end(body);
+            return
+          }
+
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.end(distribution.util.serialize([null, val]));
+          return
+        })
+      })
 
     });
   });

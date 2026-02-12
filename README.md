@@ -157,8 +157,19 @@ I had 2 recursive functions for serializing and deserializing, namely encode and
 My implementation comprises 4 software components, totaling 213 lines of code. Key challenges included debugging the recursive implementation for serialization and deserialization. I addressed it by using the JS debugger to see where it went wrong.
 
 ### Correctness & Performance Characterization
-
 *Correctness*: I wrote 5 tests; these tests take 2.28s to execute locally. This includes nested objects and arrays with mixed types, special JavaScript values like null, undefined, NaN, Infinity, booleans, numbers, strings, correct Date round-tripping, function serialization and deserialization via behavioral checks, error construction and message preservation, and object aliasing.
 
 *Performance*: The latency of various subsystems is described in the `"latency"` portion of package.json. The characteristics of my development machines are summarized in the `"dev"` portion of package.json.
 
+## M2
+### Summary
+My implementation supports RPC end-to-end, wiring routing, communication, and service invocation into a consistent request and response flow. It comprises 4 software components, totaling 274 lines of code. Key challenges included understanding the role of each component and how they interact. Overcame it by patiently reading the code and drawing a diagram.
+
+### Correctness & Performance Characterization
+*Correctness*: I wrote 5 tests; these tests take 0.654 s to execute.
+
+*Performance*: I characterized the performance of comm and RPC by sending 1000 service requests in a tight loop. Average throughput and latency is recorded in `package.json`.
+
+### Key Feature
+How would you explain the implementation of `createRPC` to someone who has no background in computer science — i.e., with the minimum jargon possible?
+`createRPC` makes a new function that sends your inputs to the computer that owns the original function, runs it and delivers the output back.
