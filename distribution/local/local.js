@@ -39,6 +39,10 @@ const mem = require('./mem.js');
 
 const store = require('./store.js');
 
+/* RPC Service */
+
+const rpc = require('./rpc.js');
+
 module.exports = {
   status: status,
   routes: routes,
@@ -47,4 +51,5 @@ module.exports = {
   gossip: gossip,
   mem: mem,
   store: store,
+  rpc: rpc,    
 };

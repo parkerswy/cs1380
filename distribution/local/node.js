@@ -80,6 +80,15 @@ function setNodeConfig() {
  * @returns {void}
  */
 function start(callback) {
+  const existing = globalThis.distribution?.node?.server;
+  if (existing && existing.listening) {
+    callback(null);
+    return;
+  }
+  if (existing && !existing.listening) {
+    try { existing.close(); } catch {}
+  }
+
   distribution.node.counts ??= 0;
   const server = http.createServer((req, res) => {
     distribution.node.counts += 1;

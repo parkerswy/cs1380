@@ -148,3 +148,21 @@ test('(5 pts) (scenario) use rpc', (done) => {
     });
   });
 });
+
+
+beforeAll((done) => {
+  distribution.node.start((e) => {
+    if (e) {
+      done(e);
+      return;
+    }
+    done();
+  });
+});
+
+afterAll((done) => {
+  if (globalThis.distribution.node.server) {
+    globalThis.distribution.node.server.close();
+  }
+  done();
+});
