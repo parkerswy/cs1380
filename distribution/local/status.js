@@ -93,6 +93,13 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
 
   waitForPort(node, 2000, (err) => {
     if (err) return callback(err);
+    distribution.local.groups.add("all", configuration, (e, v) => {
+      if (e instanceof Error) {
+        return callback(e)
+      }
+      return callback(null, true);
+    })
+    
   });
 }
 
@@ -101,13 +108,13 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
  */
 function stop(callback) {
   if (typeof callback !== "function") return;
-  const cfg = globalThis.distribution?.node?.config;
   const srv = globalThis.distribution?.node?.server;
-  callback(null, cfg);
+  callback(null, true);
   setImmediate(() => {
     try {
       if (srv && typeof srv.close === "function") {
         srv.close(() => process.exit(0));
+        // Fallback in case close callback never fires
         setTimeout(() => process.exit(0), 25);
       } else {
         process.exit(0);

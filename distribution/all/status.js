@@ -81,82 +81,42 @@ function status(config) {
    * @param {Callback} callback
    */
   function spawn(configuration, callback) {
-    const cb = (typeof callback === "function") ? callback : () => {};
-    if (!configuration || typeof configuration !== "object") {
-      return cb(new Error("status.spawn: invalid configuration"));
-    }
-    if (typeof configuration.ip !== "string") {
-      return cb(new Error("status.spawn: invalid ip"));
-    }
-    if (typeof configuration.port !== "number") {
-      return cb(new Error("status.spawn: invalid port"));
-    }
-    distribution.local.groups.get(context.gid, (e, beforeGroup) => {
-      if (e) return cb(e);
-      const entries = Object.entries(beforeGroup || {});
-      if (entries.length === 0) return cb(new Error("missing groups"));
-      const coordinator = entries[0][1];
-      const remoteSpawn = { node: coordinator, service: "status", method: "spawn" };
-      distribution.local.comm.send([configuration], remoteSpawn, (eSpawn) => {
-        if (eSpawn instanceof Error) return cb(eSpawn);
-        distribution.local.groups.add(context.gid, configuration, (eAddLocal) => {
-          if (eAddLocal instanceof Error) return cb(eAddLocal);
-          /** @type {Record<string, Error>} */
-          const failed = {};
-          /** @type {Record<string, any>} */
-          const succeeded = {};
-          let pending = entries.length;
-          for (const [sid, node] of entries) {
-            const remoteAdd = { node, service: "groups", method: "add" };
-            distribution.local.comm.send([context.gid, configuration], remoteAdd, (eAdd, vAdd) => {
-              if (eAdd instanceof Error) failed[sid] = eAdd;
-              else succeeded[sid] = vAdd;
-              if (--pending !== 0) return;
-              distribution.local.groups.get(context.gid, (eFinal, finalGroup) => {
-                if (eFinal) return cb(eFinal);
-                const remotePut = { node: configuration, service: "groups", method: "put" };
-                distribution.local.comm.send([{ gid: context.gid }, finalGroup], remotePut, (ePut) => {
-                  if (ePut instanceof Error) return cb(ePut);
-                  if (Object.keys(failed).length === 0) return cb(null, configuration);
-                  return cb(failed, configuration);
-                });
-              });
-            });
-          }
-        });
-      });
-    });
+    const remote = {node: configuration, service: "status", method: "spawn"}
+    distribution.local.comm.send([configuration], remote, (e, v) => {
+      if (e) {
+        return callback(e)
+      }
+      distribution.local.groups.add(context.gid, configuration, (e,v) => {
+        if (e) {
+          return callback(e)
+        }
+        return callback(e,v)
+      })
+    })
   }
 
   /**
    * @param {Callback} callback
    */
   function stop(callback) {
-    const cb = typeof callback === "function" ? callback : () => {};
     distribution.local.groups.get(context.gid, (e, group) => {
-      if (e) return cb(e);
-      /** @type {Record<string, Error>} */
-      const failed = {};
-      /** @type {Record<string, any>} */
-      const succeeded = {};
-      const entries = Object.entries(group || {}).filter(([_, n]) => {
-        return !(n && context.node && n.ip === context.node.ip && n.port === context.node.port);
-      });
-      if (entries.length === 0) return cb(null, succeeded);
-      let pending = entries.length;
-      for (const [sid, node] of entries) {
-        const remote = { node, service: "status", method: "stop" };
-        distribution.local.comm.send([], remote, (err, v) => {
-          if (err instanceof Error) failed[sid] = err;
-          else succeeded[sid] = v;
-          if (--pending === 0) {
-            if (Object.keys(failed).length === 0) return cb(null, succeeded);
-            return cb(failed, succeeded);
-          }
-        });
+      if (e) {
+        return callback(e)
       }
-    });
-}
+      for (const [_, node] of Object.entries(group)) {
+        if (node == context.node) {
+          continue
+        }
+        const remote = {node: node, service: 'status', method: 'stop'};
+        distribution.local.comm.send([], remote, (e, v) => {
+          if (e) {
+            return callback(e)
+          }
+          return callback(e, v)
+        })
+      }
+    })
+  }
 
   return {get, stop, spawn};
 }
