@@ -5,7 +5,6 @@
  */
 const distribution = globalThis.distribution;
 const id = distribution.util.id;
-const config = distribution.node.config;
 const net = require("node:net");
 const { spawn: spawnProc } = require("node:child_process");
 const path = require("node:path");
@@ -24,6 +23,7 @@ function get(configuration, callback) {
   if (distribution.node.counts == null) {
     distribution.node.counts = 0;
   }
+  const config = distribution.node.config;
   switch (configuration) {
     case "nid":
       return callback(null, id.getNID(config));
@@ -93,7 +93,6 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
 
   waitForPort(node, 2000, (err) => {
     if (err) return callback(err);
-    callback(null, true);
   });
 }
 
@@ -102,13 +101,13 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
  */
 function stop(callback) {
   if (typeof callback !== "function") return;
+  const cfg = globalThis.distribution?.node?.config;
   const srv = globalThis.distribution?.node?.server;
-  callback(null, true);
+  callback(null, cfg);
   setImmediate(() => {
     try {
       if (srv && typeof srv.close === "function") {
         srv.close(() => process.exit(0));
-        // Fallback in case close callback never fires
         setTimeout(() => process.exit(0), 25);
       } else {
         process.exit(0);

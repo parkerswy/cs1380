@@ -1,3 +1,5 @@
+const { config } = require("yargs");
+
 /**
  * @typedef {import("../types").Callback} Callback
  * @typedef {string} ServiceName
@@ -14,18 +16,27 @@ function get(configuration, callback) {
     return;
   }
   let service;
+  let gid = "local"
   if (typeof configuration === 'string') {
     service = configuration;
   } else if (configuration && typeof configuration === 'object' && typeof configuration.service === 'string') {
     service = configuration.service;
+    if ("gid" in configuration && typeof configuration.gid === 'string') {
+      gid = configuration.gid
+    }
   }
   if (!service) {
     return callback(new Error('routes.get: invalid configuration'), undefined);
   }
-  if (!Object.prototype.hasOwnProperty.call(distribution.local, service)) {
+  if (!Object.prototype.hasOwnProperty.call(distribution, gid) ||
+      typeof distribution[gid] !== "object" ||
+      distribution[gid] === null) {
+    return callback(new Error('routes.get: invalid gid'), undefined);
+  }
+  if (!Object.prototype.hasOwnProperty.call(distribution[gid], service)) {
     return callback(new Error('routes.get: invalid service'), undefined);
   }
-  return callback(null, distribution.local[service]);
+  return callback(null, distribution[gid][service]);
 }
 
 /**

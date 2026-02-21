@@ -95,11 +95,11 @@ function send(message, remote, callback) {
         const e0 = Array.isArray(decoded) ? decoded[0] : new Error("comm.send: response not [e,v]");
         const v0 = Array.isArray(decoded) ? decoded[1] : undefined;
 
-        if (e0) {
-          const err = e0 instanceof Error ? e0 : new Error(String(e0));
-          return cb(err, v0);
+        if (e0 instanceof Error) {
+          return cb(e0, v0);
         }
-        return cb(null, v0);
+
+        return cb(e0, v0);
       });
     }
   );
