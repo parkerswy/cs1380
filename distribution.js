@@ -31,8 +31,7 @@ function bootstrap(config) {
   distribution.all = setup({gid: 'all'});
 
   /* Overrides when missing functionality from previous milestone or extra credit is needed */
-
-  /* __start_M3_solution__
+  /* __start_M3_solution__ 
   distribution.util.wire.createRPC = distributionLib.util.wire.createRPC;
   distribution.local.routes = distributionLib.local.routes;
   distribution.local.status.spawn = distributionLib.local.status.spawn;

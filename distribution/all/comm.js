@@ -1,4 +1,6 @@
 // @ts-check
+const distribution = globalThis.distribution
+
 /**
  * @typedef {import("../types.js").Callback} Callback
  * @typedef {import("../types.js").Config} Config
@@ -29,7 +31,42 @@ function comm(config) {
    * @param {Callback} callback
    */
   function send(message, configuration, callback) {
-    callback(new Error('comm.send not implemented'));
+    /** @type {Record<string, Error>} */
+    const failed = {};
+    /** @type {Record<string, any>} */
+    const succeeded = {};
+    let cb = callback ? callback : () => {}
+    if (!configuration || typeof configuration !== "object") {
+      return cb(new Error("comm.send: invalid configuration"));
+    }
+    let gid = context.gid
+    distribution.local.groups.get(gid, (e, group) => {
+      if (e) {
+        return cb(e, null);
+      }
+      let pending = Object.keys(group).length;
+      if (!pending) {
+        return cb(new Error("comm.send: missing group"))
+      }
+      for (const [sid, node] of Object.entries(group)) {
+        /** @type {{node: any, service: string, method: string, gid?: string}} */
+        const remote = {node, service: configuration.service, method: configuration.method};
+        if (typeof configuration.gid === "string" && configuration.gid) {
+          remote.gid = configuration.gid;
+        }
+        const nodeCallback = (sid) => (e, v) => {
+          if (e instanceof Error) {
+            failed[sid] = e
+          } else {
+            succeeded[sid] = v
+          }
+          if (--pending == 0) {
+            return cb(failed, succeeded)
+          }
+        }
+        distribution.local.comm.send(message, remote, nodeCallback(sid));
+      }
+    })
   }
 
   return {send};

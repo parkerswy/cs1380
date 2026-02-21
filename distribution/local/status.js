@@ -5,7 +5,6 @@
  */
 const distribution = globalThis.distribution;
 const id = distribution.util.id;
-const config = distribution.node.config;
 const net = require("node:net");
 const { spawn: spawnProc } = require("node:child_process");
 const path = require("node:path");
@@ -24,6 +23,7 @@ function get(configuration, callback) {
   if (distribution.node.counts == null) {
     distribution.node.counts = 0;
   }
+  const config = distribution.node.config;
   switch (configuration) {
     case "nid":
       return callback(null, id.getNID(config));
@@ -93,7 +93,13 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
 
   waitForPort(node, 2000, (err) => {
     if (err) return callback(err);
-    callback(null, true);
+    distribution.local.groups.add("all", configuration, (e, v) => {
+      if (e instanceof Error) {
+        return callback(e)
+      }
+      return callback(null, true);
+    })
+    
   });
 }
 

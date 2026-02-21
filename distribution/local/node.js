@@ -94,7 +94,7 @@ function start(callback) {
     distribution.node.counts += 1;
     /* Your server will be listening for PUT requests. */
     if (req.method !== "PUT") {
-      const body = distribution.util.serialize(new Error("request not supported"));
+      const body = distribution.util.serialize([new Error("request not supported"), null]);
       res.writeHead(405, { "Content-Type": "application/json" });
       res.end(body);
       return;
@@ -143,8 +143,14 @@ function start(callback) {
           res.end(body);
           return;
         }
+      
+      if (!Array.isArray(payload)) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(distribution.util.serialize([new Error("Invalid payload"), null]));
+        return;
+      }
 
-      if (!service || !method) {
+      if (!service || !method || !gid) {
         res.writeHead(400, { "Content-Type": "application/json" });
         res.end(distribution.util.serialize([new Error("Bad request"), null]));
         return;
@@ -156,7 +162,7 @@ function start(callback) {
         Then, you need to serialize the result and send it back to the caller.
       */
 
-      distribution.local.routes.get(service, (error, sv) => {
+      distribution.local.routes.get({service: service, gid: gid}, (error, sv) => {
         if (error || !sv) {
           res.statusCode = 404;
           res.setHeader("Content-Type", "application/json");
@@ -171,7 +177,7 @@ function start(callback) {
           return;
         }
         fn(...payload, (err, val) => {
-          if (err) {
+          if (err instanceof Error) {
             res.statusCode = 500;
             res.setHeader("Content-Type", "application/json");
             let body = distribution.util.serialize([err, null]);
@@ -181,7 +187,7 @@ function start(callback) {
 
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json");
-          res.end(distribution.util.serialize([null, val]));
+          res.end(distribution.util.serialize([err ?? null, val]));
           return
         })
       })
