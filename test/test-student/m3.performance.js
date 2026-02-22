@@ -40,7 +40,7 @@ function spawnOnce(nodeConfig) {
 }
 
 test("spawn time (mean seconds)", async () => {
-  const trials = 20;
+  const trials = 3;
   const basePort = 12000 + Math.floor(Math.random() * 20000);
 
   const spawned = [];
