@@ -177,15 +177,12 @@ How would you explain the implementation of `createRPC` to someone who has no ba
 
 ## M3: Node Groups & Gossip Protocols
 ### Summary
-My implementation comprises 5 new software components, totaling `<number>` added lines of code over the previous implementation. Key challenges included debugging.
-
+My implementation comprises 5 new software components, totaling 691 added lines of code over the previous implementation. Key challenges included debugging. I overcame it by understanding the bigger picture.
 
 ### Correctness & Performance Characterization
 *Correctness*: I wrote 5 tests. These tests take 3.752s to execute.
 
-
-*Performance*: 
-
+*Performance*: Spawn times for dev machine and AWS instance are 0.12065s and 0.16148s respectively. 
 
 ### Key Feature
 What is the point of having a gossip protocol? Why doesn't a node just send the message to _all_ other nodes in its group?
