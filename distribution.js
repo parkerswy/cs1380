@@ -29,8 +29,6 @@ function bootstrap(config) {
 
   const {setup} = require('./distribution/all/all.js');
   distribution.all = setup({gid: 'all'});
-  distribution.local.status.spawn = distributionLib.local.status.spawn;
-  distribution.local.status.stop = distributionLib.local.status.stop;
 
   /* Overrides when missing functionality from previous milestone or extra credit is needed */
   /* __start_M3_solution__ 
@@ -38,6 +36,8 @@ function bootstrap(config) {
   distribution.local.routes = distributionLib.local.routes;
   distribution.local.comm = distributionLib.local.comm;
   distribution.node.start = distributionLib.node.start;
+  distribution.local.status.spawn = distributionLib.local.status.spawn;
+  distribution.local.status.stop = distributionLib.local.status.stop;
   __end_M3_solution__ */
 
   for (const [key, service] of Object.entries(distribution.local)) {
