@@ -81,8 +81,7 @@ function status(config) {
    * @param {Callback} callback
    */
   function spawn(configuration, callback) {
-    const remote = {node: configuration, service: "status", method: "spawn"}
-    distribution.local.comm.send([configuration], remote, (e, v) => {
+    distribution.local.status.spawn(configuration, (e, v) => {
       if (e) {
         return callback(e)
       }

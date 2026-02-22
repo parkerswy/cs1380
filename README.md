@@ -173,3 +173,20 @@ My implementation supports RPC end-to-end, wiring routing, communication, and se
 ### Key Feature
 How would you explain the implementation of `createRPC` to someone who has no background in computer science — i.e., with the minimum jargon possible?
 `createRPC` makes a new function that sends your inputs to the computer that owns the original function, runs it and delivers the output back.
+
+
+## M3: Node Groups & Gossip Protocols
+### Summary
+My implementation comprises 5 new software components, totaling `<number>` added lines of code over the previous implementation. Key challenges included debugging.
+
+
+### Correctness & Performance Characterization
+*Correctness*: I wrote 5 tests. These tests take 3.752s to execute.
+
+
+*Performance*: 
+
+
+### Key Feature
+What is the point of having a gossip protocol? Why doesn't a node just send the message to _all_ other nodes in its group?
+Gossip spreads updates efficiently and reliably by having nodes talk to a few peers each round, which scales and survives failures and churn. Sending to all nodes directly causes traffic and retry overhead to explode as the group grows.

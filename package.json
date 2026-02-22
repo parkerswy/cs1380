@@ -66,12 +66,12 @@
     },
     {
       "milestone": "M3",
-      "hours": 999,
-      "loc": 999,
+      "hours": 18,
+      "loc": 691,
       "dev": {
-        "cpu-no": 999,
-        "mem-gb": 999,
-        "ssd-gb": 999
+        "cpu-no": 8,
+        "mem-gb": 8,
+        "ssd-gb": 245
       },
       "throughput": {
         "dev": [],

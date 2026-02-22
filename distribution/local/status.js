@@ -94,7 +94,7 @@ d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });
   waitForPort(node, 2000, (err) => {
     if (err) return callback(err);
     distribution.local.groups.add("all", configuration, (e, v) => {
-      if (e instanceof Error) {
+      if (e) {
         return callback(e)
       }
       return callback(null, true);
