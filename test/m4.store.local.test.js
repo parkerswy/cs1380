@@ -104,15 +104,21 @@ test('(1 pts) local.store.put(no key)', (done) => {
   const user = {first: 'Josiah', last: 'Carberry'};
 
   distribution.local.store.put(user, null, (e, v) => {
-    distribution.local.store.get(id.getID(user), (e, v) => {
-      try {
-        expect(e).toBeFalsy();
-        expect(v).toEqual(user);
-        done();
-      } catch (error) {
-        done(error);
-      }
-    });
+    try {
+      expect(e).toBeFalsy();
+      expect(v).toEqual(user);
+      distribution.local.store.get(id.getID(user), (e, v) => {
+        try {
+          expect(e).toBeFalsy();
+          expect(v).toEqual(user);
+          done();
+        } catch (error) {
+          done(error);
+        }
+      });
+    } catch (error) {
+      done(error);
+    }
   });
 });
 

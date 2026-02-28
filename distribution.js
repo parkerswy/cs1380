@@ -39,6 +39,9 @@ function bootstrap(config) {
   distribution.local.status.spawn = distributionLib.local.status.spawn;
   distribution.local.status.stop = distributionLib.local.status.stop;
   __end_M3_solution__ */
+  distribution.all.store.append = distributionLib.all.store.append
+  distribution.local.store.append = distributionLib.local.store.append
+  distribution.all.mem.reconf = distributionLib.all.mem.reconf
 
   for (const [key, service] of Object.entries(distribution.local)) {
     distribution.local.routes.put(service, key, () => {});

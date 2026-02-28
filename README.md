@@ -187,3 +187,4 @@ My implementation comprises 5 new software components, totaling 691 added lines 
 ### Key Feature
 What is the point of having a gossip protocol? Why doesn't a node just send the message to _all_ other nodes in its group?
 Gossip spreads updates efficiently and reliably by having nodes talk to a few peers each round, which scales and survives failures and churn. Sending to all nodes directly causes traffic and retry overhead to explode as the group grows.
+

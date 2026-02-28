@@ -33,13 +33,16 @@ function get(name, callback) {
 function put(config, group, callback) {
   const cb = (typeof callback === "function") ? callback : () => {};
   let gid
+  let setupConfig
   if (typeof config == "string") {
     gid = config
+    setupConfig = {gid}
   } else {
     gid = config.gid
+    setupConfig = config
   }
   allGroups[gid] = group;
-  distribution[gid] = all.setup({gid})
+  distribution[gid] = all.setup(setupConfig)
   return cb(null, group);
 }
 

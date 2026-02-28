@@ -3,7 +3,7 @@
   "version": "0.2.33",
   "description": "A library for building distributed systems.",
   "main": "distribution.js",
-  "useLibrary": true,
+  "useLibrary": false,
   "debug": false,
   "directories": {
     "test": "test"
@@ -86,19 +86,19 @@
     },
     {
       "milestone": "M4",
-      "hours": 999,
+      "hours": 10,
       "loc": 999,
       "dev": {
-        "cpu-no": 999,
-        "mem-gb": 999,
-        "ssd-gb": 999
+        "cpu-no": 8,
+        "mem-gb": 8,
+        "ssd-gb": 245
       },
       "throughput": {
-        "dev": [],
+        "dev": [["insert", 245.1258761427561], ["query", 704.078193324485]],
         "aws": []
       },
       "latency": {
-        "dev": [],
+        "dev": [["insert", 0.004077188490000003], ["query", 0.001329764053000002]],
         "aws": []
       },
       "dloc": -99

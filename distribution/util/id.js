@@ -9,6 +9,7 @@
 
 const assert = require('assert');
 const crypto = require('crypto');
+const { id } = require("./util.js");
 
 /**
  * @param {any} obj
@@ -70,12 +71,36 @@ const naiveHash = (kid, nids) => {
   return sortedNids[index];
 };
 
+function bisectRight(arr, target) {
+  let lo = 0, hi = arr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid][0] <= target) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
 /** @type { Hasher } */
 const consistentHash = (kid, nids) => {
+  const kidNum = idToNum(kid)
+  let nidsToNums = []
+  for (const nid of nids) {
+    nidsToNums.push([idToNum(nid), nid])
+  }
+  let sortedNidsToNums = nidsToNums.sort()
+  let index = bisectRight(sortedNidsToNums, kidNum) % sortedNidsToNums.length;
+  return sortedNidsToNums[index][1]
 };
 
 /** @type { Hasher } */
 const rendezvousHash = (kid, nids) => {
+  let combined = []
+  for (const nid of nids) {
+    combined.push([idToNum(getID(kid + nid)), nid])
+  }
+  let sortedCombined = combined.sort() 
+  return sortedCombined[sortedCombined.length - 1][1]
 };
 
 module.exports = {

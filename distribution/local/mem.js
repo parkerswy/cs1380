@@ -9,6 +9,9 @@
  * @typedef {StoreConfig | string | null} SimpleConfig
  */
 
+const { id } = require("../util/util.js");
+
+const memory = new Map()
 
 /**
  * @param {any} state
@@ -16,7 +19,16 @@
  * @param {Callback} callback
  */
 function put(state, configuration, callback) {
-  return callback(new Error('mem.put not implemented'));
+  const cb = typeof callback === "function" ? callback : () => {};
+  if (configuration) {
+    if (typeof(configuration) === "object") {
+      configuration = configuration.key
+    }
+    memory.set(configuration, state)
+  } else {
+    memory.set(id.getID(state), state)
+  }
+  return cb(null, state)
 };
 
 /**
@@ -33,7 +45,17 @@ function append(state, configuration, callback) {
  * @param {Callback} callback
  */
 function get(configuration, callback) {
-  return callback(new Error('mem.get not implemented'));
+  const cb = typeof callback === "function" ? callback : () => {};
+  if (configuration && (typeof(configuration) === "object")) {
+    configuration = configuration.key
+  }
+  if (configuration == null) {
+    return cb(null, Array.from(memory.keys()));
+  }
+  if (memory.has(configuration)) {
+    return cb(null, memory.get(configuration))
+  }
+  return cb(new Error("no such key value"))
 }
 
 /**
@@ -41,7 +63,16 @@ function get(configuration, callback) {
  * @param {Callback} callback
  */
 function del(configuration, callback) {
-  return callback(new Error('mem.del not implemented'));
+  const cb = typeof callback === "function" ? callback : () => {};
+  if (configuration && typeof(configuration) === "object") {
+    configuration = configuration.key
+  }
+  if (!memory.has(configuration)) {
+    return cb(new Error("key does not exist"))
+  }
+  let ret = memory.get(configuration)
+  memory.delete(configuration)
+  return cb(null, ret)
 };
 
 module.exports = {put, get, del, append};
