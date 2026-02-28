@@ -87,7 +87,7 @@
     {
       "milestone": "M4",
       "hours": 10,
-      "loc": 999,
+      "loc": 793,
       "dev": {
         "cpu-no": 8,
         "mem-gb": 8,
