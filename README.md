@@ -188,3 +188,21 @@ My implementation comprises 5 new software components, totaling 691 added lines 
 What is the point of having a gossip protocol? Why doesn't a node just send the message to _all_ other nodes in its group?
 Gossip spreads updates efficiently and reliably by having nodes talk to a few peers each round, which scales and survives failures and churn. Sending to all nodes directly causes traffic and retry overhead to explode as the group grows.
 
+
+## M4: Distributed Storage
+### Summary
+My implementation comprises 5 new software components. Key challenges included debugging. I overcame it by looking at the test cases carefully and identifying potential areas where the code went wrong.
+
+
+### Correctness & Performance Characterization
+*Correctness*: I wrote 5 tests. These tests take 0.924s to execute.
+
+*Performance*: 
+Insert throughput for dev and AWS are 245.12588 and 734.67793. 
+Query throughput for dev and AWS are 704.07819 and 826.28809. 
+Insert latency for dev and AWS are 0.00408 and 0.00136. 
+Query latency for dev and AWS are 0.00133 and 0.00103. 
+
+### Key Feature
+Why is the `reconf` method designed to first identify all the keys to be relocated and then relocate individual objects instead of fetching all the objects immediately and then pushing them to their corresponding locations?
+`reconf` can determine relocation using only keys (KIDs) by comparing old vs new placement. Therefore, it first filters to the minimal set of keys that actually move, and only then fetches and transfers those objects, avoiding full-dataset reads and unnecessary network work.
