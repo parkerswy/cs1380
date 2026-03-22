@@ -208,12 +208,18 @@ Why is the `reconf` method designed to first identify all the keys to be relocat
 `reconf` can determine relocation using only keys (KIDs) by comparing old vs new placement. Therefore, it first filters to the minimal set of keys that actually move, and only then fetches and transfers those objects, avoiding full-dataset reads and unnecessary network work.
 
 
+
 ## M5: Distributed Execution Engine
 ### Summary
-My implementation comprises 1 new software component. Key challenges included implementing synchronous calls for store.append. I overcame it by researching online on how to do so.
+My implementation comprises 3 new software components (the `mr` orchestrator, distributed `store.append`, and local `store.append` with lock-based concurrency). Key challenges included implementing `store.append` with proper concurrent access control during the shuffle phase, where multiple nodes write to the same keys simultaneously. I overcame this by implementing a Promise-based lock queue that serializes writes to the same key, preventing race conditions.
 
-## Correctness & Performance Characterization
-*Correctness*: I wrote 5 tests, testing difference use cases of mapreduce like EDIT!!!
+### Correctness & Performance Characterization
+*Correctness*: I wrote 5 tests, testing difference use cases of mapreduce like average score of basketball players, highest exam scores over subjects, frequency words. 
 
 *Performance*: 
-My dlib workflow can sustain a throughput of 24.249 documents per second, with an average latency of 0.825 seconds per document.
+My dlib workflow can sustain a throughput of 24.249 documents per second, with an average latency of 0.825 seconds per document on my local dev machine. 
+My dlib workflow can sustain a throughput of 150.254 documents per second, with an average latency of 0.00666 seconds per document on my AWS machine. 
+
+
+### Key features
+I implemented the full MapReduce pipeline, including setup, map, shuffle, reduce and completion.
