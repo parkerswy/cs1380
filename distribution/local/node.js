@@ -176,20 +176,27 @@ function start(callback) {
           res.end(distribution.util.serialize([new Error("invalid service"), null]));
           return;
         }
-        fn(...payload, (err, val) => {
-          if (err instanceof Error) {
-            res.statusCode = 500;
-            res.setHeader("Content-Type", "application/json");
-            let body = distribution.util.serialize([err, null]);
-            res.end(body);
-            return
-          }
+        try {
+          fn.call(sv, ...payload, (err, val) => {
+            if (err instanceof Error) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              let body = distribution.util.serialize([err, null]);
+              res.end(body);
+              return
+            }
 
-          res.statusCode = 200;
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.end(distribution.util.serialize([err ?? null, val]));
+            return
+          })
+        } catch (ex) {
+          res.statusCode = 500;
           res.setHeader("Content-Type", "application/json");
-          res.end(distribution.util.serialize([err ?? null, val]));
-          return
-        })
+          const err = ex instanceof Error ? ex : new Error(String(ex));
+          res.end(distribution.util.serialize([err, null]));
+        }
       })
 
     });

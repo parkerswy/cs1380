@@ -206,3 +206,14 @@ Query latency for dev and AWS are 0.00133 and 0.00103.
 ### Key Feature
 Why is the `reconf` method designed to first identify all the keys to be relocated and then relocate individual objects instead of fetching all the objects immediately and then pushing them to their corresponding locations?
 `reconf` can determine relocation using only keys (KIDs) by comparing old vs new placement. Therefore, it first filters to the minimal set of keys that actually move, and only then fetches and transfers those objects, avoiding full-dataset reads and unnecessary network work.
+
+
+## M5: Distributed Execution Engine
+### Summary
+My implementation comprises 1 new software component. Key challenges included implementing synchronous calls for store.append. I overcame it by researching online on how to do so.
+
+## Correctness & Performance Characterization
+*Correctness*: I wrote 5 tests, testing difference use cases of mapreduce like EDIT!!!
+
+*Performance*: 
+My dlib workflow can sustain a throughput of 24.249 documents per second, with an average latency of 0.825 seconds per document.
