@@ -18,6 +18,7 @@
  * @property {string} [repo]
  * @property {string} [seeds]
  * @property {string} [tag]
+ * @property {boolean | string} [fresh]
  * @property {string} ["base-port"]
  * @property {string} ["coordinator-port"]
  * @property {string} ["github-token-env"]
@@ -72,7 +73,8 @@ const distributionFactory = require("../distribution.js");
 const DEFAULT_CLUSTER_FILE = path.resolve(process.cwd(), "store", "search-cluster.json");
 const DEFAULT_AWS_CLUSTER_FILE = path.resolve(process.cwd(), "store", "search-aws-cluster.json");
 const DEFAULT_REPO = "https://github.com/parkerswy/cs1380.git";
-const DEFAULT_BRANCH = "main";
+const DEFAULT_BRANCH = "search-engine";
+const LEGACY_DEFAULT_BRANCH = "main";
 const DEFAULT_IDLE_MS = 5 * 60 * 1000;
 
 /**
@@ -103,6 +105,7 @@ function parseArgs(argv) {
 function usage() {
   console.log(`Usage:
   node scripts/search-control.js crawl  [--gid search] [--nodes 3] [--target 100000]
+  node scripts/search-control.js start  [--gid search] --aws
   node scripts/search-control.js query  [--gid search]
   node scripts/search-control.js status [--gid search]
   node scripts/search-control.js reset  [--gid search]
@@ -114,6 +117,11 @@ Options:
   --base-port <n>        First worker port for crawl-created local nodes (default: 9100)
   --seeds <path>         Seed URL file for crawl (default: scripts/m6-seeds.txt)
   --round-size <n>       Crawl attempts per node per round (default: 2)
+  --repo <url>           Git repository to clone on AWS nodes
+                         (default: ${DEFAULT_REPO})
+  --branch <name>        Git branch to checkout on AWS nodes
+                         (default: ${DEFAULT_BRANCH})
+  --fresh                Ignore saved AWS cluster config and create new nodes
 
 AWS options:
   --region <name>        AWS region (or AWS_REGION)
@@ -184,6 +192,14 @@ function execFile(command, args, options = {}) {
       }
     });
   });
+}
+
+/**
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -398,7 +414,27 @@ function sshArgs(cluster, node, remoteCommand) {
  * @param {string} [input]
  */
 async function ssh(cluster, node, remoteCommand, input) {
-  return execFile("ssh", sshArgs(cluster, node, remoteCommand), {input});
+  let lastError;
+  let lastWasTransient = false;
+  for (let attempt = 1; attempt <= 12; attempt += 1) {
+    try {
+      return await execFile("ssh", sshArgs(cluster, node, remoteCommand), {input});
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      const transient = /Connection timed out|Connection refused|No route to host|Operation timed out/.test(message);
+      lastWasTransient = transient;
+      if (!transient || attempt === 12) {
+        break;
+      }
+      await sleep(10000);
+    }
+  }
+  if (!lastWasTransient) {
+    throw lastError;
+  }
+  const detail = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(`could not SSH to ${node.ip}:22 after retries; check that the instance is running, has a public IP, and its security group allows inbound SSH. Last error: ${detail}`);
 }
 
 /**
@@ -603,6 +639,22 @@ async function createAwsCluster(args, clusterPath) {
 }
 
 /**
+ * @param {Args} args
+ * @param {string} clusterPath
+ * @param {string} reason
+ * @returns {Promise<Cluster>}
+ */
+async function createFreshAwsCluster(args, clusterPath, reason) {
+  if (fs.existsSync(clusterPath)) {
+    const backupPath = `${clusterPath}.${Date.now()}.bak`;
+    fs.copyFileSync(clusterPath, backupPath);
+    console.log(`[search-control] backed up old AWS cluster config to ${backupPath}`);
+  }
+  console.log(`[search-control] creating fresh AWS cluster: ${reason}`);
+  return createAwsCluster(args, clusterPath);
+}
+
+/**
  * @param {Cluster} cluster
  * @param {SearchNode} node
  * @param {Args} args
@@ -622,7 +674,16 @@ async function setupRemoteNode(cluster, node, args) {
     `  printf 'machine github.com\\n  login %s\\n  password %s\\n' ${shellQuote(auth.user)} "$GITHUB_TOKEN" > "$AUTH_HOME/.netrc"`,
     "fi",
     "git_with_auth() { if [ -n \"$AUTH_HOME\" ]; then HOME=\"$AUTH_HOME\" git \"$@\"; else git \"$@\"; fi; }",
-    "if command -v apt-get >/dev/null 2>&1; then sudo apt-get update -y && sudo apt-get install -y git nodejs npm; fi",
+    "if command -v apt-get >/dev/null 2>&1; then",
+    "  sudo apt-get update -y",
+    "  sudo apt-get install -y git curl ca-certificates",
+    "  if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then",
+    "    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -",
+    "    sudo apt-get install -y nodejs",
+    "  fi",
+    "fi",
+    "node --version",
+    "npm --version",
     `if [ ! -d ${shellQuote(repoDir)}/.git ]; then git_with_auth clone ${shellQuote(cluster.repo || DEFAULT_REPO)} ${shellQuote(repoDir)}; fi`,
     `cd ${shellQuote(repoDir)}`,
     `git_with_auth fetch origin ${shellQuote(cluster.branch || DEFAULT_BRANCH)}`,
@@ -654,7 +715,21 @@ async function startRemoteSearchNode(cluster, node) {
     `nohup node -e 'process.title="cs1380-search-node-${node.port}"; require("./distribution.js")(); const d=globalThis.distribution; d.node.config={ip:"0.0.0.0",port:${node.port}}; d.node.start((e)=>{ if(e){ console.error(e); process.exit(1); } });' > logs/search-node-${node.port}.log 2>&1 &`,
   ].join(" && ");
   await ssh(cluster, node, boot);
-  await waitForPort(node.ip, node.port, 120000);
+  try {
+    await waitForPort(node.ip, node.port, 120000);
+  } catch (error) {
+    let remoteLog = "";
+    try {
+      const result = await ssh(cluster, node, `cd cs1380 && tail -n 80 logs/search-node-${node.port}.log || true`);
+      remoteLog = result.stdout || result.stderr || "";
+    } catch (logError) {
+      remoteLog = `could not fetch remote log: ${
+        logError instanceof Error ? logError.message : String(logError)
+      }`;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${message}. If the remote log says the node started, check the EC2 security group allows inbound TCP ${node.port}. Remote log:\n${remoteLog}`);
+  }
 }
 
 /**
@@ -664,14 +739,39 @@ async function startRemoteSearchNode(cluster, node) {
 async function ensureAwsCluster(args) {
   const clusterPath = clusterPathFor({...args, aws: true});
   let cluster;
-  if (fs.existsSync(clusterPath)) {
+  if (args.fresh) {
+    cluster = await createFreshAwsCluster(args, clusterPath, "--fresh was passed");
+  } else if (fs.existsSync(clusterPath)) {
     cluster = readCluster(clusterPath);
   } else {
     cluster = await createAwsCluster(args, clusterPath);
   }
+  cluster.repo = String(args.repo || cluster.repo || DEFAULT_REPO);
+  cluster.branch = String(args.branch ||
+    (cluster.branch === LEGACY_DEFAULT_BRANCH ? DEFAULT_BRANCH : cluster.branch) ||
+    DEFAULT_BRANCH);
 
-  const ids = cluster.nodes.map((node) => node.instanceId);
-  const states = await describeInstances(ids, cluster.region);
+  let ids = cluster.nodes.map((node) => node.instanceId);
+  let states;
+  try {
+    states = await describeInstances(ids, cluster.region);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/InvalidInstanceID|InvalidInstanceId|does not exist|not found/i.test(message)) {
+      throw error;
+    }
+    cluster = await createFreshAwsCluster(args, clusterPath, "saved EC2 instance ids no longer exist");
+    ids = cluster.nodes.map((node) => node.instanceId);
+    states = await describeInstances(ids, cluster.region);
+  }
+  const unusable = states.filter((instance) =>
+    instance.State === "terminated" || instance.State === "shutting-down"
+  );
+  if (states.length !== ids.length || unusable.length) {
+    cluster = await createFreshAwsCluster(args, clusterPath, "saved EC2 instances are not reusable");
+    ids = cluster.nodes.map((node) => node.instanceId);
+    states = await describeInstances(ids, cluster.region);
+  }
   const stopped = states.filter((instance) => instance.State === "stopped").map((instance) => instance.InstanceId);
   if (stopped.length) {
     await aws(["ec2", "start-instances", "--instance-ids", ...stopped], cluster.region);
@@ -841,6 +941,28 @@ async function crawlCommand(args) {
 /**
  * @param {Args} args
  */
+async function startCommand(args) {
+  if (!args.aws) {
+    throw new Error("start is currently for AWS clusters only; use crawl for local test nodes");
+  }
+  const {cluster, clusterPath} = await ensureAwsCluster(args);
+  cluster.lastUsed = Date.now();
+  writeCluster(clusterPath, cluster);
+  scheduleAwsIdleStop(clusterPath, Number(args["idle-ms"] || cluster.idleMs || DEFAULT_IDLE_MS));
+  console.log(JSON.stringify({
+    started: cluster.nodes.map((node) => ({
+      instanceId: node.instanceId,
+      ip: node.ip,
+      port: node.port,
+      state: node.state,
+    })),
+    idleStopMs: Number(args["idle-ms"] || cluster.idleMs || DEFAULT_IDLE_MS),
+  }, null, 2));
+}
+
+/**
+ * @param {Args} args
+ */
 async function statusCommand(args) {
   if (args.aws) {
     await withAwsCoordinator(args, async (cluster, gid) => {
@@ -938,6 +1060,7 @@ async function main() {
   }
 
   if (command === "crawl") await crawlCommand(args);
+  else if (command === "start") await startCommand(args);
   else if (command === "query") await queryCommand(args);
   else if (command === "status") await statusCommand(args);
   else if (command === "reset") await resetCommand(args);
