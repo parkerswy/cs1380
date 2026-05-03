@@ -20,6 +20,7 @@
  * @typedef {Object} Config
  * @property {?string} gid
  * @property {Hasher} [hash]
+ * @property {Node} [node]
  * @property {Sampler} [subset]
  */
 

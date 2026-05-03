@@ -4,8 +4,10 @@
     "checkJs": true,
     "noEmit": true,
     "module": "commonjs",
+    "moduleResolution": "node",
     "strict": false,
     "skipLibCheck": true,
+    "types": ["node"],
     "lib": ["es2022"],
     "target": "es6"
   },

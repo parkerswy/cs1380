@@ -39,6 +39,9 @@ const store = require('./store.js');
 /* Map-Reduce Service */
 const mr = require('./mr.js');
 
+/* Search Service */
+const search = require('./search.js');
+
 /**
  * @typedef {Object} GroupServices
  * @property {import("./comm.js").Comm} comm
@@ -49,6 +52,7 @@ const mr = require('./mr.js');
  * @property {import("./mem.js").Mem} mem
  * @property {import("./mem.js").Mem} store
  * @property {import("./mr.js").Mr} mr
+ * @property {any} search
  *
  * @param {Config} config
  * @returns {GroupServices}
@@ -63,6 +67,7 @@ function setup(config) {
     mem: mem(config),
     store: store(config),
     mr: mr(config),
+    search: search(config),
   };
 }
 
@@ -75,5 +80,6 @@ module.exports = {
   mem,
   store,
   mr,
+  search,
   setup,
 };

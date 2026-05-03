@@ -84,6 +84,7 @@ function bisectRight(arr, target) {
 /** @type { Hasher } */
 const consistentHash = (kid, nids) => {
   const kidNum = idToNum(kid)
+  /** @type {Array<[bigint, string]>} */
   let nidsToNums = []
   for (const nid of nids) {
     nidsToNums.push([idToNum(nid), nid])
@@ -95,6 +96,7 @@ const consistentHash = (kid, nids) => {
 
 /** @type { Hasher } */
 const rendezvousHash = (kid, nids) => {
+  /** @type {Array<[bigint, string]>} */
   let combined = []
   for (const nid of nids) {
     combined.push([idToNum(getID(kid + nid)), nid])

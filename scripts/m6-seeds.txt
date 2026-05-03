@@ -1,0 +1,6 @@
+https://avidml.org/database/
+https://incidentdatabase.ai/
+https://airisk.mit.edu/ai-incident-tracker
+https://nvd.nist.gov/products/cpe/search/results?namingFormat=2.3&keyword=artificial+intelligence
+https://oecd.ai/en/incidents?search_terms=%5B%7B%22type%22:%22KEYWORD%22,%22value%22:%22ai%22%7D%5D&and_condition=false&from_date=2020-04-20&to_date=2026-04-20&properties_config=%7B%22principles%22:%5B%5D,%22industries%22:%5B%5D,%22harm_types%22:%5B%5D,%22harm_levels%22:%5B%5D,%22harmed_entities%22:%5B%5D,%22business_functions%22:%5B%5D,%22ai_tasks%22:%5B%5D,%22autonomy_levels%22:%5B%5D,%22languages%22:%5B%5D%7D&order_by=date&num_results=100
+https://www.aiaaic.org/aiaaic-repository/ai-algorithmic-and-automation-incidents

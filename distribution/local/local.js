@@ -39,6 +39,10 @@ const mem = require('./mem.js');
 
 const store = require('./store.js');
 
+/* Search Service */
+
+const search = require('./search.js');
+
 /* RPC Service */
 
 const rpc = require('./rpc.js');
@@ -51,5 +55,6 @@ module.exports = {
   gossip: gossip,
   mem: mem,
   store: store,
+  search: search,
   rpc: rpc,    
 };

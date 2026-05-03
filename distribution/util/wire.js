@@ -8,8 +8,9 @@ const log = require('../util/log.js');
 const crypto = require("node:crypto");
 const distribution = globalThis.distribution;
 
-/** @type {WeakMap<Function, string>} */
+/** @type {Map<string, Function>} */
 const toLocalMap = new Map();
+/** @type {WeakMap<Function, string>} */
 const toRemoteMap = new WeakMap();
 
 function genPtr() {
